@@ -1,33 +1,34 @@
 #include "MainWindow.h"
 
+#include "MainPanel.h"
+
 #include <QMenuBar>
 #include <QAction>
 #include <QPushButton>
 #include <QTabBar>
 #include <QToolBar>
+#include <QApplication>
+#include <QScrollBar>
 
 MainWindow::MainWindow()
     : QWidget(),
     menuBar(new QMenuBar(this)), 
     m_layout(new QHBoxLayout(this)),
-    tabWidget(new QTabWidget(this)),
-    image(new ImageFormat(this)),
-    m_panel(new MainPanel(this)) 
+    m_panel(new CustomPanel(this)),
+    scrollArea(new QScrollArea(this))
 {
     setWindowTitle(m_title);
     resize(m_size);
 
     m_layout->setMenuBar(menuBar);
-
-    m_layout->addWidget(tabWidget);
-    tabWidget->addTab(m_panel, "Панель");
-
-    tabWidget->tabBar()->setTabsClosable(true);
-    connect(tabWidget->tabBar(), &QTabBar::tabCloseRequested, this, [&](const int &index){
-                tabWidget->removeTab(index);
-            });
+    
+    scrollArea->setWidgetResizable(true);
+    
+    scrollArea->setWidget(m_panel);
+    m_layout->addWidget(scrollArea);
 
     setupMenuBar();
+    setupToolBar();
     
     this->setLayout(m_layout);
 }
@@ -66,6 +67,16 @@ void MainWindow::setupMenuBar()
     exportAsAct->setShortcut(QKeySequence(tr("Shift+Ctrl+E", "File | Export as...")));
     fileMenu->addAction(exportAsAct);
 
+    QAction* undoAct = new QAction(tr("Undo"), this);
+    undoAct->setShortcuts(QKeySequence::Undo);
+    connect(undoAct, &QAction::triggered, m_panel, &CustomPanel::undo);
+    editMenu->addAction(undoAct);
+
+    QAction* redoAct = new QAction(tr("Redo"), this);
+    redoAct->setShortcuts(QKeySequence::Redo);
+    connect(redoAct, &QAction::triggered, m_panel, &CustomPanel::redo);
+    editMenu->addAction(redoAct);
+
     QToolBar *verticalToolBar = new QToolBar(tr("Tools"), this);
     verticalToolBar->setOrientation(Qt::Vertical);
 }
@@ -77,14 +88,18 @@ void MainWindow::setupToolBar()
 
     QVBoxLayout *v_layout = new QVBoxLayout;
     
-    QAction *brushAction = new QAction("B", this);
-    verticalToolBar->addAction(brushAction);
+    for (int i = 0; i < 10; ++i) 
+    {
+        QPushButton *button = new QPushButton(QString::number(i), this);
+        verticalToolBar->addWidget(button);
+    }
 
-    QAction *eraserAction = new QAction("E", this);
-    verticalToolBar->addAction(eraserAction);
- 
+    QAction *clearAction = new QAction(tr("Clear"), this);
+    connect(clearAction, &QAction::triggered, m_panel, &CustomPanel::clearPanel);
+    verticalToolBar->addAction(clearAction);
+
     v_layout->addWidget(verticalToolBar);
-    
     m_layout->addLayout(v_layout);
 }
+
 
