@@ -20,13 +20,12 @@ class MainWindow : public QWidget
         void setupMenuBar();
         void setupToolBar();
 
-        CustomPanel *m_panel;
-
         const QSize m_size{1200, 600};
-        const QString m_title = "AI";
+        
+        const QString m_title = "Vector";
 
         QMenuBar *menuBar;
         QHBoxLayout *m_layout;
-        QScrollArea* scrollArea;
+        CustomPanel *m_panel;
 };
 

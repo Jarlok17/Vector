@@ -14,18 +14,14 @@ MainWindow::MainWindow()
     : QWidget(),
     menuBar(new QMenuBar(this)), 
     m_layout(new QHBoxLayout(this)),
-    m_panel(new CustomPanel(this)),
-    scrollArea(new QScrollArea(this))
+    m_panel(new CustomPanel(this))
 {
     setWindowTitle(m_title);
     resize(m_size);
 
     m_layout->setMenuBar(menuBar);
-    
-    scrollArea->setWidgetResizable(true);
-    
-    scrollArea->setWidget(m_panel);
-    m_layout->addWidget(scrollArea);
+
+    m_layout->addWidget(m_panel);
 
     setupMenuBar();
     setupToolBar();
@@ -69,17 +65,19 @@ void MainWindow::setupMenuBar()
 
     QAction* undoAct = new QAction(tr("Undo"), this);
     undoAct->setShortcuts(QKeySequence::Undo);
-    connect(undoAct, &QAction::triggered, m_panel, &CustomPanel::undo);
     editMenu->addAction(undoAct);
 
     QAction* redoAct = new QAction(tr("Redo"), this);
     redoAct->setShortcuts(QKeySequence::Redo);
-    connect(redoAct, &QAction::triggered, m_panel, &CustomPanel::redo);
     editMenu->addAction(redoAct);
 
     QToolBar *verticalToolBar = new QToolBar(tr("Tools"), this);
     verticalToolBar->setOrientation(Qt::Vertical);
+
+    connect(undoAct, &QAction::triggered, m_panel, &CustomPanel::undo);
+    connect(redoAct, &QAction::triggered, m_panel, &CustomPanel::redo);
 }
+
 
 void MainWindow::setupToolBar()
 {
@@ -87,19 +85,44 @@ void MainWindow::setupToolBar()
     verticalToolBar->setOrientation(Qt::Vertical);
 
     QVBoxLayout *v_layout = new QVBoxLayout;
-    
-    for (int i = 0; i < 10; ++i) 
-    {
-        QPushButton *button = new QPushButton(QString::number(i), this);
-        verticalToolBar->addWidget(button);
-    }
+
+    QAction *tool1Action = new QAction(tr("Tool 1"), this);
+    QAction *tool2Action = new QAction(tr("Tool 2"), this);
 
     QAction *clearAction = new QAction(tr("Clear"), this);
-    connect(clearAction, &QAction::triggered, m_panel, &CustomPanel::clearPanel);
     verticalToolBar->addAction(clearAction);
 
-    v_layout->addWidget(verticalToolBar);
-    m_layout->addLayout(v_layout);
-}
+    verticalToolBar->addAction(tool1Action);
+    verticalToolBar->addAction(tool2Action);
 
+   auto toolActionClicked = [&](QAction *action)
+   {
+        QList<QAction*> toolActions = verticalToolBar->actions();
+        for (auto toolAction : toolActions)
+        {
+            if (toolAction != action)
+            {
+                toolAction->setCheckable(false);
+                toolAction->setChecked(false);
+            }
+        }
+
+        action->setCheckable(true);
+        action->setChecked(true);
+
+    };
+
+    connect(tool1Action, &QAction::triggered, this, [&]() {
+        toolActionClicked(tool1Action);
+    });
+
+    connect(tool2Action, &QAction::triggered, this, [&]() {
+        toolActionClicked(tool2Action);
+    });
+
+    connect(clearAction, &QAction::triggered, m_panel, &CustomPanel::clearPanel);
+
+    v_layout->addWidget(verticalToolBar);
+    m_layout->insertLayout(0, v_layout);
+}
 

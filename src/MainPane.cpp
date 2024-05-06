@@ -42,7 +42,7 @@ void CustomPanel::mouseReleaseEvent(QMouseEvent *event)
 
 void CustomPanel::paintEvent(QPaintEvent *event)
 {
-   QPainter painter(this);
+    QPainter painter(this);
     painter.fillRect(rect(), Qt::white);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -60,7 +60,8 @@ void CustomPanel::paintEvent(QPaintEvent *event)
         }
     }
 
-    QWidget::paintEvent(event);}
+    QWidget::paintEvent(event);
+}
 
 void CustomPanel::drawLineTo(const QPoint &endPoint)
 {
@@ -78,7 +79,7 @@ void CustomPanel::drawLineTo(const QPoint &endPoint)
 
         for (int i = 0; i < steps; ++i)
         {
-            QPoint nextPoint(round(m_lastPoint.x() + dx * i), round(m_lastPoint.y() + dy * i));
+            QPoint nextPoint(round(m_lastPoint.x() + dx * i * 2), round(m_lastPoint.y() + dy * i * 2));
             QVector<QPoint> line;
             line.append(m_lastPoint);
             line.append(nextPoint);
@@ -102,14 +103,8 @@ void CustomPanel::clearPanel()
 
 void CustomPanel::undo()
 {
-    if(!m_undoStack.isEmpty())
-    {
-        m_redoStack.push(m_pixmap);
-    }
 }
 
 void CustomPanel::redo()
 {
-
 }
-
